@@ -2,6 +2,7 @@
 #include <iostream>
 #include "json.hpp"
 #include "PID.h"
+#include "Twiddle.h"
 #include <math.h>
 
 // for convenience
@@ -32,6 +33,7 @@ int main()
 {
   uWS::Hub h;
 
+  Twiddle twiddle;
   PID pid;
   PID throttlePid;
   /* Initialize the pid variable as follow:
@@ -40,10 +42,11 @@ int main()
   *  Use a large value for derivative, to smooth approach on curves.
   *  These parameters were choosen based on an empirical evaluation. 
   */
+  twiddle.Init(0.08, 0.0002, 1.5);
   pid.Init(0.08, 0.0002, 1.5);
   throttlePid.Init(1, 0.0001, 1);
 
-  h.onMessage([&pid, &throttlePid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &throttlePid, &twiddle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -62,6 +65,8 @@ int main()
           /*
           * Calcuate steering value here, remember the steering value is [-1, 1].
           */
+          twiddle.Update(cte);
+          pid.UpdateCoefficients(twiddle.Coefficients());
           steer_value = pid.Calculate(cte);
           /*
           * Use another PID controller to control the speed!
