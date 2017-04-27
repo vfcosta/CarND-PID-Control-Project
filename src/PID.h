@@ -43,9 +43,9 @@ public:
   double TotalError();
 
   /*
-  * Calculate the steering angle
+  * Calculate result value
   */
-  double CalculateSteer(double cte);
+  double Calculate(double cte);
 };
 
 #endif /* PID_H */

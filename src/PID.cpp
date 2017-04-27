@@ -29,7 +29,7 @@ double PID::TotalError() {
   return this->i_error;
 }
 
-double PID::CalculateSteer(double cte) {
+double PID::Calculate(double cte) {
   this->UpdateError(cte);
   return -this->Kp * this->p_error - this->Kd * this->d_error - this->Ki * this->i_error;
 }
