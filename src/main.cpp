@@ -34,8 +34,13 @@ int main()
 
   PID pid;
   PID throttlePid;
-  // TODO: Initialize the pid variable.
-  pid.Init(0.1, 0.0004, 1);
+  /* Initialize the pid variable as follow:
+  *  Use a small value for proportional, to get a more stable driving, but sufficient to handle curves without leaving course.
+  *  Use a small value for integral, to keep the car stable and take into account small deviations along the course.
+  *  Use a large value for derivative, to smooth approach on curves.
+  *  These parameters were choosen based on an empirical evaluation. 
+  */
+  pid.Init(0.12, 0.0004, 1.1);
   throttlePid.Init(1, 0.0004, 1);
 
   h.onMessage([&pid, &throttlePid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -55,13 +60,13 @@ int main()
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
           /*
-          * TODO: Calcuate steering value here, remember the steering value is
-          * [-1, 1].
-          * NOTE: Feel free to play around with the throttle and speed. Maybe use
-          * another PID controller to control the speed!
+          * Calcuate steering value here, remember the steering value is [-1, 1].
           */
           steer_value = pid.Calculate(cte);
-          double throttle = 1 - fmin(1, fabs(throttlePid.Calculate(cte)));
+          /*
+          * Use another PID controller to control the speed!
+          */
+          double throttle = 1 - fmin(1, fabs(throttlePid.Calculate(cte))); // normalize throttle to [0, 1]
 
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << " Throttle: " << throttle << std::endl;
