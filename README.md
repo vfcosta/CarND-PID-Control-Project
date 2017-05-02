@@ -3,6 +3,22 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Reflections
+
+Two PID's were used in this project. One for steering angles control and other for car speed.
+
+For the steering angle PID, the values used for proportional, integral and derivative coefficients were `0.12, 0.0004, 1.1`, respectively.
+For the speed PID `1, 0.0004, 1` was used.
+
+Therefore, those values were chosen based on its effects on driving beaviour as follow:
+  *  Use a small value for proportional, to get a more stable driving, but sufficient to handle curves without leaving course.
+  *  Use a small value for integral, to keep the car stable and take into account small deviations along the course.
+  *  Use a large value for derivative, to smooth approach on curves.
+
+These parameters were choosen based on an empirical evaluation. A twiddle  experiment was also conducted and may be seen in [twiddle](https://github.com/vfcosta/CarND-PID-Control-Project/tree/twiddle) branch.
+
+The output video with these PID's applied to car driving may be seen [here](https://github.com/vfcosta/CarND-PID-Control-Project/blob/master/track1.ogv?raw=true).
+
 ## Dependencies
 
 * cmake >= 3.5
