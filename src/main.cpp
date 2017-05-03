@@ -40,8 +40,8 @@ int main()
   *  Use a large value for derivative, to smooth approach on curves.
   *  These parameters were choosen based on an empirical evaluation. 
   */
-  pid.Init(0.12, 0.0004, 1.1);
-  throttlePid.Init(1, 0.0004, 1);
+  pid.Init(0.08, 0.0002, 1.5);
+  throttlePid.Init(1, 0.0001, 1);
 
   h.onMessage([&pid, &throttlePid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.

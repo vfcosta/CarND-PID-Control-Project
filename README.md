@@ -7,8 +7,8 @@ Self-Driving Car Engineer Nanodegree Program
 
 Two PID's were used in this project. One for steering angles control and other for car speed.
 
-For the steering angle PID, the values used for proportional, integral and derivative coefficients were `0.12, 0.0004, 1.1`, respectively.
-For the speed PID `1, 0.0004, 1` was used.
+For the steering angle PID, the values used for proportional, integral and derivative coefficients were `0.08, 0.0002, 1.5`, respectively.
+For the speed PID `1, 0.0001, 1` was used.
 
 Therefore, those values were chosen based on its effects on driving beaviour as follow:
   *  Use a small value for proportional, to get a more stable driving, but sufficient to handle curves without leaving course.
