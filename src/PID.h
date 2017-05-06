@@ -46,6 +46,11 @@ public:
   * Calculate result value
   */
   double Calculate(double cte);
+
+  /*
+  * Update coefficients
+  */
+  void UpdateCoefficients(double coef[]);
 };
 
 #endif /* PID_H */

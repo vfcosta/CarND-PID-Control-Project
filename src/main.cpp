@@ -2,6 +2,7 @@
 #include <iostream>
 #include "json.hpp"
 #include "PID.h"
+#include "Twiddle.h"
 #include <math.h>
 
 // for convenience
@@ -32,6 +33,7 @@ int main()
 {
   uWS::Hub h;
 
+  Twiddle twiddle;
   PID pid;
   PID throttlePid;
   /* Initialize the pid variable as follow:
@@ -40,10 +42,11 @@ int main()
   *  Use a large value for derivative, to smooth approach on curves.
   *  These parameters were choosen based on an empirical evaluation. 
   */
-  pid.Init(0.15, 0.0001, 1.5);
+  twiddle.Init(0.191072, 0.0001, 1.38265);
+  pid.Init(0.191072, 0.0001, 1.38265);
   throttlePid.Init(1, 0.0001, 0.2);
 
-  h.onMessage([&pid, &throttlePid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &throttlePid, &twiddle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -59,9 +62,18 @@ int main()
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
+
           /*
           * Calcuate steering value here, remember the steering value is [-1, 1].
           */
+          if (!twiddle.Update(cte)) {
+            twiddle.FinishIteration();
+            std::string reset_msg = "42[\"reset\", {}]";
+            ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
+            pid.Init(0, 0, 0);
+            throttlePid.Init(1, 0.0001, 0.2);
+          }
+          pid.UpdateCoefficients(twiddle.Coefficients());
           steer_value = pid.Calculate(cte);
           /*
           * Use another PID controller to control the speed!

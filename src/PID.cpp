@@ -30,3 +30,8 @@ double PID::Calculate(double cte) {
   return -this->Kp * this->p_error - this->Kd * this->d_error - this->Ki * this->i_error;
 }
 
+void PID::UpdateCoefficients(double coef[]) {
+  this->Kp = coef[0];
+  this->Kd = coef[1];
+  this->Ki = coef[2];
+}
