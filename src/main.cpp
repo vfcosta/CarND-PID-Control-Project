@@ -29,9 +29,12 @@ std::string hasData(std::string s) {
   return "";
 }
 
-int main()
+int main(int argc, char** argv)
 {
   uWS::Hub h;
+  std::string twiddleParam = "twiddle";
+  bool useTwiddle = argc > 1 && !twiddleParam.compare(argv[1]);
+  std::cout << "Use twiddle: " << useTwiddle << std::endl;
 
   Twiddle twiddle;
   PID pid;
@@ -40,13 +43,13 @@ int main()
   *  Use a small value for proportional, to get a more stable driving, but sufficient to handle curves without leaving course.
   *  Use a small value for integral, to keep the car stable and take into account small deviations along the course.
   *  Use a large value for derivative, to smooth approach on curves.
-  *  These parameters were choosen based on an empirical evaluation. 
+  *  These parameters were choosen based on twiddle. 
   */
   twiddle.Init(0.191072, 0.0001, 1.38265);
   pid.Init(0.191072, 0.0001, 1.38265);
   throttlePid.Init(1, 0.0001, 0.2);
 
-  h.onMessage([&pid, &throttlePid, &twiddle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &throttlePid, &twiddle, &useTwiddle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -66,14 +69,16 @@ int main()
           /*
           * Calcuate steering value here, remember the steering value is [-1, 1].
           */
-          if (!twiddle.Update(cte)) {
-            twiddle.FinishIteration();
-            std::string reset_msg = "42[\"reset\", {}]";
-            ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
-            pid.Init(0, 0, 0);
-            throttlePid.Init(1, 0.0001, 0.2);
+          if (useTwiddle) {
+            if (!twiddle.Update(cte)) {
+              twiddle.FinishIteration();
+              std::string reset_msg = "42[\"reset\", {}]";
+              ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
+              pid.Init(0, 0, 0);
+              throttlePid.Init(1, 0.0001, 0.2);
+            }
+            pid.UpdateCoefficients(twiddle.Coefficients());
           }
-          pid.UpdateCoefficients(twiddle.Coefficients());
           steer_value = pid.Calculate(cte);
           /*
           * Use another PID controller to control the speed!
